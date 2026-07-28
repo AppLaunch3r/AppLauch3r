@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>iOS Launcher</title>
+
+  <!-- PWA Requirements -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Apple iOS Mobile Requirements -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Launcher">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <style>
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; 
+      user-select: none; 
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body, html { 
+      width: 100%; 
+      height: 100%; 
+      overflow: hidden; 
+      background: #000; 
+      color: #fff; 
+    }
+
+    /* --- LOCK SCREEN --- */
+    #lock-screen {
+      position: absolute; 
+      inset: 0; 
+      background: linear-gradient(135deg, #1c1c1e, #2c2c2e);
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 10;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .lock-title {
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+      margin-bottom: 20px;
+    }
+
+    .passcode-dots { 
+      display: flex; 
+      gap: 16px; 
+      margin-bottom: 40px; 
+    }
+
+    .dot { 
+      width: 14px; 
+      height: 14px; 
+      border-radius: 50%; 
+      border: 2px solid #fff; 
+      transition: background 0.15s ease;
+    }
+
+    .dot.filled { 
+      background: #fff; 
+    }
+
+    .keypad { 
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 20px; 
+    }
+
+    .key {
+      width: 75px; 
+      height: 75px; 
+      border-radius: 50%; 
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 28px; 
+      font-weight: 400;
+      cursor: pointer; 
+    }
+
+    .key:active { 
+      background: rgba(255, 255, 255, 0.4); 
+    }
+
+    /* --- HOME SCREEN --- */
+    #home-screen {
+      position: absolute; 
+      inset: 0; 
+      background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000') center/cover no-repeat;
+      display: none; 
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 20px; 
+      padding: 60px 20px; 
+      align-content: start;
+    }
+
+    .app-icon {
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 8px; 
+      cursor: pointer; 
+      text-decoration: none; 
+      color: #fff;
+    }
+
+    .icon-box {
+      width: 62px; 
+      height: 62px; 
+      border-radius: 14px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      font-weight: 700; 
+      font-size: 18px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    .app-label { 
+      font-size: 11px; 
+      font-weight: 500;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8); 
+    }
+
+    /* Custom App Branding Colors */
+    .yt { background: #FF0000; }
+    .tt { background: #000000; border: 1px solid rgba(255,255,255,0.2); }
+    .x  { background: #000000; border: 1px solid rgba(255,255,255,0.2); }
+    .rd { background: #FF4500; }
+    .dc { background: #5865F2; }
+
+  </style>
+</head>
+<body>
+
+  <!-- Lock Screen -->
+  <div id="lock-screen">
+    <div class="lock-title">Enter Passcode</div>
+    <div class="passcode-dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <div class="keypad">
+      <div class="key" onclick="pressKey('1')">1</div>
+      <div class="key" onclick="pressKey('2')">2</div>
+      <div class="key" onclick="pressKey('3')">3</div>
+      <div class="key" onclick="pressKey('4')">4</div>
+      <div class="key" onclick="pressKey('5')">5</div>
+      <div class="key" onclick="pressKey('6')">6</div>
+      <div class="key" onclick="pressKey('7')">7</div>
+      <div class="key" onclick="pressKey('8')">8</div>
+      <div class="key" onclick="pressKey('9')">9</div>
+      <div></div>
+      <div class="key" onclick="pressKey('0')">0</div>
+      <div></div>
+    </div>
+  </div>
+
+  <!-- Home Screen -->
+  <div id="home-screen">
+    <div class="app-icon" onclick="openApp('https://youtube.com')">
+      <div class="icon-box yt">YT</div>
+      <span class="app-label">YouTube</span>
+    </div>
+    <div class="app-icon" onclick="openApp('https://tiktok.com')">
+      <div class="icon-box tt">TT</div>
+      <span class="app-label">TikTok</span>
+    </div>
+    <div class="app-icon" onclick="openApp('https://x.com')">
+      <div class="icon-box x">X</div>
+      <span class="app-label">X</span>
+    </div>
+    <div class="app-icon" onclick="openApp('https://reddit.com')">
+      <div class="icon-box rd">RD</div>
+      <span class="app-label">Reddit</span>
+    </div>
+    <div class="app-icon" onclick="openApp('https://discord.com/app')">
+      <div class="icon-box dc">DC</div>
+      <span class="app-label">Discord</span>
+    </div>
+  </div>
+
+  <script>
+    let input = "";
+    const pin = "1234";
+
+    function pressKey(num) {
+      if (input.length < 4) {
+        input += num;
+        updateDots();
+      }
+      
+      if (input.length === 4) {
+        if (input === pin) {
+          // Passcode Correct
+          const lockScreen = document.getElementById('lock-screen');
+          lockScreen.style.opacity = '0';
+          lockScreen.style.transform = 'scale(1.1)';
+          
+          setTimeout(() => {
+            lockScreen.style.display = 'none';
+            document.getElementById('home-screen').style.display = 'grid';
+          }, 300);
+        } else {
+          // Passcode Wrong -> Reset Dots
+          setTimeout(() => {
+            input = "";
+            updateDots();
+          }, 250);
+        }
+      }
+    }
+
+    function updateDots() {
+      const dots = document.querySelectorAll('.dot');
+      dots.forEach((dot, idx) => {
+        if (idx < input.length) {
+          dot.classList.add('filled');
+        } else {
+          dot.classList.remove('filled');
+        }
+      });
+    }
+
+    function openApp(url) {
+      window.location.href = url;
+    }
+
+    // Register Service Worker for PWA functionality
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker registered successfully!', reg))
+          .catch(err => console.error('Service Worker registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
