@@ -49,7 +49,6 @@
     .lock-title {
       font-size: 20px;
       font-weight: 500;
-      letter-spacing: -0.5px;
       margin-bottom: 20px;
     }
 
@@ -143,6 +142,47 @@
     .rd { background: #FF4500; }
     .dc { background: #5865F2; }
 
+    /* --- IN-APP EMBEDDED VIEWER --- */
+    #app-viewer {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      display: none;
+      flex-direction: column;
+      z-index: 20;
+    }
+
+    .app-header {
+      height: 48px;
+      background: #1c1c1e;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid #2c2c2e;
+    }
+
+    .back-btn {
+      color: #0A84FF;
+      font-size: 17px;
+      font-weight: 500;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    #app-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    iframe {
+      width: 100%;
+      height: calc(100% - 48px);
+      border: none;
+      background: #fff;
+    }
+
   </style>
 </head>
 <body>
@@ -174,26 +214,36 @@
 
   <!-- Home Screen -->
   <div id="home-screen">
-    <div class="app-icon" onclick="openApp('https://youtube.com')">
+    <div class="app-icon" onclick="openEmbed('https://www.youtube.com/embed', 'YouTube')">
       <div class="icon-box yt">YT</div>
       <span class="app-label">YouTube</span>
     </div>
-    <div class="app-icon" onclick="openApp('https://tiktok.com')">
+    <div class="app-icon" onclick="openEmbed('https://www.tiktok.com/embed', 'TikTok')">
       <div class="icon-box tt">TT</div>
       <span class="app-label">TikTok</span>
     </div>
-    <div class="app-icon" onclick="openApp('https://x.com')">
+    <div class="app-icon" onclick="openEmbed('https://www.bing.com', 'Search')">
       <div class="icon-box x">X</div>
-      <span class="app-label">X</span>
+      <span class="app-label">Web Search</span>
     </div>
-    <div class="app-icon" onclick="openApp('https://reddit.com')">
+    <div class="app-icon" onclick="openEmbed('https://www.reddit.com/media', 'Reddit')">
       <div class="icon-box rd">RD</div>
       <span class="app-label">Reddit</span>
     </div>
-    <div class="app-icon" onclick="openApp('https://discord.com/app')">
+    <div class="app-icon" onclick="openEmbed('https://e.widgetbot.io', 'Discord')">
       <div class="icon-box dc">DC</div>
       <span class="app-label">Discord</span>
     </div>
+  </div>
+
+  <!-- Embedded Web Viewer -->
+  <div id="app-viewer">
+    <div class="app-header">
+      <button class="back-btn" onclick="closeEmbed()">‹ Home</button>
+      <span id="app-title">App</span>
+      <div style="width: 50px;"></div>
+    </div>
+    <iframe id="web-frame" src=""></iframe>
   </div>
 
   <script>
@@ -208,7 +258,6 @@
       
       if (input.length === 4) {
         if (input === pin) {
-          // Passcode Correct
           const lockScreen = document.getElementById('lock-screen');
           lockScreen.style.opacity = '0';
           lockScreen.style.transform = 'scale(1.1)';
@@ -218,7 +267,6 @@
             document.getElementById('home-screen').style.display = 'grid';
           }, 300);
         } else {
-          // Passcode Wrong -> Reset Dots
           setTimeout(() => {
             input = "";
             updateDots();
@@ -238,16 +286,24 @@
       });
     }
 
-    function openApp(url) {
-      window.location.href = url;
+    // Embed launcher functions
+    function openEmbed(url, title) {
+      document.getElementById('app-title').innerText = title;
+      document.getElementById('web-frame').src = url;
+      document.getElementById('app-viewer').style.display = 'flex';
     }
 
-    // Register Service Worker for PWA functionality
+    function closeEmbed() {
+      document.getElementById('app-viewer').style.display = 'none';
+      document.getElementById('web-frame').src = '';
+    }
+
+    // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('Service Worker registered successfully!', reg))
-          .catch(err => console.error('Service Worker registration failed:', err));
+          .then(reg => console.log('Service Worker registered!', reg))
+          .catch(err => console.error('Service Worker failed:', err));
       });
     }
   </script>
