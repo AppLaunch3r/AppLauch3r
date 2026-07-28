@@ -135,12 +135,54 @@
       text-shadow: 0 1px 3px rgba(0,0,0,0.8); 
     }
 
-    /* App Branding Colors */
+    /* Branding Colors */
     .yt { background: #FF0000; }
     .tt { background: #000000; border: 1px solid rgba(255,255,255,0.2); }
     .x  { background: #000000; border: 1px solid rgba(255,255,255,0.2); }
     .rd { background: #FF4500; }
     .dc { background: #5865F2; }
+
+    /* --- IN-APP OVERLAY WINDOW --- */
+    #app-viewer {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      display: none;
+      flex-direction: column;
+      z-index: 20;
+    }
+
+    .app-header {
+      height: 48px;
+      background: #1c1c1e;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid #2c2c2e;
+    }
+
+    .back-btn {
+      color: #0A84FF;
+      font-size: 17px;
+      font-weight: 500;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    #app-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    iframe {
+      width: 100%;
+      height: calc(100% - 48px);
+      border: none;
+      background: #fff;
+    }
+
   </style>
 </head>
 <body>
@@ -172,26 +214,36 @@
 
   <!-- Home Screen -->
   <div id="home-screen">
-    <div class="app-icon" onclick="openApp('https://www.youtube.com')">
+    <div class="app-icon" onclick="openEmbed('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ', 'YouTube')">
       <div class="icon-box yt">YT</div>
       <span class="app-label">YouTube</span>
     </div>
-    <div class="app-icon" onclick="openApp('https://www.tiktok.com')">
+    <div class="app-icon" onclick="openEmbed('https://www.tiktok.com/embed', 'TikTok')">
       <div class="icon-box tt">TT</div>
       <span class="app-label">TikTok</span>
     </div>
-    <div class="app-icon" onclick="openApp('https://x.com')">
+    <div class="app-icon" onclick="openEmbed('https://www.bing.com', 'Web')">
       <div class="icon-box x">X</div>
-      <span class="app-label">X</span>
+      <span class="app-label">Web Search</span>
     </div>
-    <div class="app-icon" onclick="openApp('https://www.reddit.com')">
+    <div class="app-icon" onclick="openEmbed('https://old.reddit.com', 'Reddit')">
       <div class="icon-box rd">RD</div>
       <span class="app-label">Reddit</span>
     </div>
-    <div class="app-icon" onclick="openApp('https://discord.com/app')">
+    <div class="app-icon" onclick="openEmbed('https://e.widgetbot.io', 'Discord')">
       <div class="icon-box dc">DC</div>
       <span class="app-label">Discord</span>
     </div>
+  </div>
+
+  <!-- In-App Frame Overlay -->
+  <div id="app-viewer">
+    <div class="app-header">
+      <button class="back-btn" onclick="closeEmbed()">‹ Home</button>
+      <span id="app-title">App</span>
+      <div style="width: 50px;"></div>
+    </div>
+    <iframe id="web-frame" src=""></iframe>
   </div>
 
   <script>
@@ -234,16 +286,23 @@
       });
     }
 
-    // Direct Navigation Function
-    function openApp(url) {
-      window.location.href = url;
+    // Embed Frame Controls
+    function openEmbed(url, title) {
+      document.getElementById('app-title').innerText = title;
+      document.getElementById('web-frame').src = url;
+      document.getElementById('app-viewer').style.display = 'flex';
     }
 
-    // Register Service Worker for PWA
+    function closeEmbed() {
+      document.getElementById('app-viewer').style.display = 'none';
+      document.getElementById('web-frame').src = '';
+    }
+
+    // Register Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('PWA Service Worker Active!', reg))
+          .then(reg => console.log('Service Worker Registered!', reg))
           .catch(err => console.error('SW Error:', err));
       });
     }
