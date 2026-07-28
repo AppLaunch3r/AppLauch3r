@@ -135,14 +135,14 @@
       text-shadow: 0 1px 3px rgba(0,0,0,0.8); 
     }
 
-    /* Custom App Branding Colors */
+    /* Custom App Colors */
     .yt { background: #FF0000; }
     .tt { background: #000000; border: 1px solid rgba(255,255,255,0.2); }
     .x  { background: #000000; border: 1px solid rgba(255,255,255,0.2); }
     .rd { background: #FF4500; }
     .dc { background: #5865F2; }
 
-    /* --- IN-APP EMBEDDED VIEWER --- */
+    /* --- EMBEDDED WEB VIEWER --- */
     #app-viewer {
       position: absolute;
       inset: 0;
@@ -214,29 +214,29 @@
 
   <!-- Home Screen -->
   <div id="home-screen">
-    <div class="app-icon" onclick="openEmbed('https://www.youtube.com/embed', 'YouTube')">
+    <div class="app-icon" onclick="openEmbed('https://www.youtube.com', 'YouTube', false)">
       <div class="icon-box yt">YT</div>
       <span class="app-label">YouTube</span>
     </div>
-    <div class="app-icon" onclick="openEmbed('https://www.tiktok.com/embed', 'TikTok')">
+    <div class="app-icon" onclick="openEmbed('https://www.tiktok.com', 'TikTok', true)">
       <div class="icon-box tt">TT</div>
       <span class="app-label">TikTok</span>
     </div>
-    <div class="app-icon" onclick="openEmbed('https://www.bing.com', 'Search')">
+    <div class="app-icon" onclick="openEmbed('https://x.com', 'X', true)">
       <div class="icon-box x">X</div>
-      <span class="app-label">Web Search</span>
+      <span class="app-label">X</span>
     </div>
-    <div class="app-icon" onclick="openEmbed('https://www.reddit.com/media', 'Reddit')">
+    <div class="app-icon" onclick="openEmbed('https://www.reddit.com', 'Reddit', true)">
       <div class="icon-box rd">RD</div>
       <span class="app-label">Reddit</span>
     </div>
-    <div class="app-icon" onclick="openEmbed('https://e.widgetbot.io', 'Discord')">
+    <div class="app-icon" onclick="openEmbed('https://discord.com/app', 'Discord', true)">
       <div class="icon-box dc">DC</div>
       <span class="app-label">Discord</span>
     </div>
   </div>
 
-  <!-- Embedded Web Viewer -->
+  <!-- In-App Viewer Window -->
   <div id="app-viewer">
     <div class="app-header">
       <button class="back-btn" onclick="closeEmbed()">‹ Home</button>
@@ -286,10 +286,17 @@
       });
     }
 
-    // Embed launcher functions
-    function openEmbed(url, title) {
+    // Embed Launcher Function with CORS Proxy Support
+    function openEmbed(targetUrl, title, needsProxy) {
       document.getElementById('app-title').innerText = title;
-      document.getElementById('web-frame').src = url;
+      
+      // If the target site blocks iframe headers, run it through the proxy
+      let finalUrl = targetUrl;
+      if (needsProxy) {
+        finalUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
+      }
+      
+      document.getElementById('web-frame').src = finalUrl;
       document.getElementById('app-viewer').style.display = 'flex';
     }
 
@@ -298,7 +305,7 @@
       document.getElementById('web-frame').src = '';
     }
 
-    // Register Service Worker for PWA
+    // Register Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
